@@ -16,6 +16,7 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
+        print('-----------SCRIPT OPERATION STARTED-----------')
         # save json file to mongodb cloud
         user = os.environ['MONGO_USER']
         password = os.environ['MONGO_PASSWORD']
@@ -28,11 +29,12 @@ def index():
         Collection = db["data_roarmedia"]
 
         # Collect data using selenium and bs4
+        print('-----------DATA SCRAPPING STARTED-----------')
         options = Options()
         options.add_argument("--start-maximized")
         driver = webdriver.Chrome(options=options)
 
-        site_url = 'https://roar.media/english/life/travel'
+        site_url = 'https://roar.media/english/life/history'
 
         driver.get(site_url)
         show_more_button = WebDriverWait(driver, 20).until(
@@ -75,19 +77,23 @@ def index():
             articles_info.append(article_info)
 
         driver.quit()
+        print('-----------DATA SCRAPPING FINISHED-----------')
 
-        with open('article_list_data.json', 'w', encoding='utf8') as f:
+        with open('data/article_list_data.json', 'w', encoding='utf8') as f:
             f.write(json.dumps(articles_info, ensure_ascii=False, indent=4))
+        print('-----------DATA  SAVED IN JSON FILE-----------')
 
         # restore json file data in mongodb cloud
         # Loading or Opening the json file
-        with open('article_list_data.json') as file:
+        with open('data/article_list_data.json') as file:
             file_data = json.load(file)
 
         if isinstance(file_data, list):
             Collection.insert_many(file_data)
         else:
             Collection.insert_one(file_data)
+        print('-----------DATA  SAVED MONGODB-----------')
+        print('-----------SCRIPT OPERATION FINISHED SUCCESSFULLY-----------')
     return render_template('index.html')
 
 
