@@ -1,11 +1,14 @@
 from flask import Flask
+from flask import render_template, request
 
 app = Flask(__name__)
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    return 'Welcome to your app'
+    if request.method == 'POST':
+        print('button clicked')
+    return render_template('index.html')
 
 
 if __name__ == '__main__':
